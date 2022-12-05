@@ -95,7 +95,7 @@ async def options(message):
 async def func(message):
     global subs
     # this func analise all messages
-    if (message.text == "Курс на сегодня"):
+    if message.text == "Курс на сегодня":
         try:
             usd = await val("USD")
             eur = await val("EUR")
