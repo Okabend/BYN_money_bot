@@ -4,7 +4,14 @@ from telebot import types, TeleBot
 from datetime import datetime, time
 from apscheduler.schedulers.background import BackgroundScheduler
 import time
+import logging
 import statistics
+
+logging.basicConfig(filename='all_logs.log', encoding='utf-8', level=logging.DEBUG)
+logging.debug('This message should go to the log file')
+logging.info('So should this')
+logging.warning('And this, too')
+logging.error('And non-ASCII stuff, too, like Øresund and Malmö')
 
 token = open("token.txt", "r").read()
 bot = TeleBot(token)
@@ -125,17 +132,18 @@ def func(message):
 
 @bot.callback_query_handler(func=lambda call: call.data == "unsub")
 def unsub(callback_obj: telebot.types.CallbackQuery):
-    with open("subs.txt", "w+") as s:
-        list_subs = list(s)
-        print(list_subs)
-        if f"{callback_obj.from_user.id}\n" in list_subs:
-            list_subs.remove(f"{callback_obj.from_user.id}\n")
-            print(list_subs)
-            s.writelines(str(list_subs[:]))
-            print(f"{callback_obj.from_user.id} отписался")
-            bot.send_message(callback_obj.from_user.id, "Вы успешно отписались от рассылки")
-        else:
-            bot.send_message(callback_obj.from_user.id, "Вы не можете отписаться от рассылки, так как на неё не подписаны")
+    with open("subs.txt", "r") as subs:
+        list_subs = list(subs)
+        with open("subs.txt", "w") as subs:
+            if f"{callback_obj.from_user.id}\n" in list_subs:
+                list_subs.remove(f"{callback_obj.from_user.id}\n")
+                print(f"{callback_obj.from_user.id} отписался")
+                subs.writelines(list_subs)
+                bot.send_message(callback_obj.from_user.id, "Вы успешно отписались от рассылки")
+            else:
+                bot.send_message(callback_obj.from_user.id, "Вы не можете отписаться от рассылки, так как на неё не подписаны")
+                subs.writelines(list_subs)
+    print(list_subs)
 
 
 @bot.callback_query_handler(func=lambda call: call.data in str1)
